@@ -1,0 +1,69 @@
+﻿@page "/customers"
+@attribute [Authorize(Roles = "Administrator,CSM")]
+
+<h3>Customers</h3>
+@inject ICustomerService customerService
+@inject NavigationManager navigationManager
+
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Name</th>
+            <th>Birth Date</th>
+            <th>Phone Number</th>
+            <th>ZipCode</th>
+            <th>Address</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in customerService.Customers)
+        {
+            <tr>
+                <td>@customer.Name</td>
+                <td>@customer.BirthDate?.ToShortDateString()</td>
+                <td>@customer.PhoneNumber</td>
+                <td>@customer.ZipCode</td>
+                <td>@customer.Address</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowCustomer(customer.CustomerId))">
+                        <i class="oi oi-pencil"></i>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => DeleteCustomer(customer.CustomerId))">
+                        <i class="oi oi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="CreateNewCustomer">
+    <i class="oi oi-plus"></i> Create New Customer
+</button>
+
+@code {
+    protected override async Task OnParametersSetAsync()
+    {
+        await customerService.LoadCustomers();
+    }
+
+    void ShowCustomer(int id)
+    {
+        navigationManager.NavigateTo($"customerpage/{id}");
+    }
+
+    void CreateNewCustomer()
+    {
+        navigationManager.NavigateTo("customerpage");
+    }
+
+    async Task DeleteCustomer(int customerId)
+    {
+        await customerService.DeleteCustomer(customerId);
+        await customerService.LoadCustomers();
+    }
+}

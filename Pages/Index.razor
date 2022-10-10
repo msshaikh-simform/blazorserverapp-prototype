@@ -1,0 +1,35 @@
+﻿@page "/"
+@inject IJSRuntime js
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Hello, @context.User.Identity.Name!</h1>
+    </Authorized>
+
+    <NotAuthorized>
+        <h1>Hello, Guest!</h1>
+    </NotAuthorized>
+</AuthorizeView>
+
+Welcome to your new app.
+<AuthorizeView>
+    <NotAuthorized>
+        <SurveyPrompt Title="Do you want to access data?" />
+    </NotAuthorized>
+</AuthorizeView>
+
+
+<AuthorizeView>
+    <Authorized>
+        <br /><br />
+        <br /><br />
+        <h5>State: Authorised</h5>
+    </Authorized>
+    <NotAuthorized>
+        <br /><br />
+        <h5>State: UnAuthorised</h5>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code{
+}

@@ -1,0 +1,113 @@
+﻿@page "/quotepage"
+@page "/quotepage/{id:int}"
+@attribute [Authorize(Roles = "Administrator,QuoteStaff")]
+
+@using QuotationMgmtSystem.Data
+
+@inject IQuotationService quotationService
+@inject ICustomerService customerService
+@inject IToastService toAstService
+@inject NavigationManager navigationManager
+
+@if (Id == null)
+{
+    <h3>Create a new Quotation</h3>
+}
+else
+{
+    <h3>Edit "@quote.ProjectName"</h3>
+}
+
+<EditForm Model="quote" OnSubmit="HandleSubmit">
+    <div class="form-group">
+        <label for="projectname">Project Name</label>
+        <InputText id="projectname" @bind-Value="@quote.ProjectName" class="form-control"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="customerid">Customer</label>
+        <InputSelect id="customerid" @bind-Value="@quote.CustomerId" class="form-control">
+            @foreach (var cust in customerService.Customers)
+            {
+                <option value="@cust.CustomerId">@cust.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label for="bidreceiptdate">Bid Receipt Date</label>
+        <InputDate id="bidreceiptdate" @bind-Value="@quote.BidReceiptDate" class="form-control"></InputDate>
+    </div>
+    <div class="form-group">
+        <label for="bidsubmissiondate">Bid Submission Date</label>
+        <InputDate id="bidsubmissiondate" @bind-Value="@quote.BidSubmissionDate" class="form-control"></InputDate>
+    </div>
+    <div class="form-group">
+        <label for="notes">Notes</label>
+        <InputTextArea rows="4" id="notes" @bind-Value="@quote.Notes" class="form-control"></InputTextArea>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">
+        <i class="oi oi-check"></i> @btnText
+    </button>
+
+    @if (Id != null)
+    {
+        <button type="button" class="btn btn-danger" @onclick="DeleteQuotation" style="margin-left:10px">
+            <i class="oi oi-trash"></i> Delete Quotation
+        </button>
+    }
+    <button type="button" class="btn btn-primary" @onclick="BackToQuotationList" style="margin-left:10px">
+        <i class="oi oi-chevron-left"></i> Back to Quotation List
+    </button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    Quotation quote = new Quotation();
+    List<Customer> AllCustomers = new List<Customer>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await customerService.LoadCustomers();
+        btnText = Id == null ? "Add New Quotation" : "Update Quotation";
+    }
+
+    async Task HandleSubmit()
+    {
+        if (string.IsNullOrEmpty(quote.ProjectName) || !quote.BidReceiptDate.HasValue || !quote.BidSubmissionDate.HasValue || string.IsNullOrEmpty(quote.Notes) || quote.CustomerId == 0)
+        {
+            toAstService.ShowError("Please fill quotation details correctly!");
+            return;
+        }
+
+        if (Id == null)
+        {
+            await quotationService.SaveQuotation(quote, null);
+        }
+        else
+        {
+            await quotationService.SaveQuotation(quote, Id);
+        }
+    }
+
+    async Task DeleteQuotation()
+    {
+        await quotationService.DeleteQuotation(quote.QuoteId);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != null)
+        {
+            quote = await quotationService.GetQuotationById((int)Id);
+        }
+    }
+
+    void BackToQuotationList()
+    {
+        navigationManager.NavigateTo("quotes");
+    }
+}

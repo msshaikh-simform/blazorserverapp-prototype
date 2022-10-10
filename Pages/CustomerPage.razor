@@ -1,0 +1,104 @@
+﻿@page "/customerpage"
+@page "/customerpage/{id:int}"
+@attribute [Authorize(Roles = "Administrator,CSM")]
+
+@using QuotationMgmtSystem.Data
+
+@inject ICustomerService customerService
+@inject IToastService toAstService
+@inject NavigationManager navigationManager
+
+@if (Id == null)
+{
+    <h3>Create a new Customer</h3>
+}
+else
+{
+    <h3>Edit "@cust.Name"</h3>
+}
+
+<EditForm Model="cust" OnSubmit="HandleSubmit">
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" @bind-Value="@cust.Name" class="form-control"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="birthdate">Birth Date</label>
+        <InputDate id="birthdate" @bind-Value="@cust.BirthDate" class="form-control"></InputDate>
+    </div>
+    <div class="form-group">
+        <label for="phonenumber">Phone Number</label>
+        <InputText id="phonenumber" @bind-Value="@cust.PhoneNumber" class="form-control"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="zipcode">ZipCode</label>
+        <InputText id="zipcode" @bind-Value="@cust.ZipCode" class="form-control"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="address">Address</label>
+        <InputTextArea rows="4" id="address" @bind-Value="@cust.Address" class="form-control"></InputTextArea>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">
+        <i class="oi oi-check"></i> @btnText
+    </button>
+
+    @if (Id != null)
+    {
+        <button type="button" class="btn btn-danger" @onclick="DeleteCustomer" style="margin-left:10px">
+            <i class="oi oi-trash"></i> Delete Customer
+        </button>
+    }
+    <button type="button" class="btn btn-primary" @onclick="BackToCustomrList" style="margin-left:10px">
+        <i class="oi oi-chevron-left"></i> Back to Customer List
+    </button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    Customer cust = new Customer();
+
+    protected override void OnInitialized()
+    {
+        btnText = Id == null ? "Add New Customer" : "Update Customer";
+    }
+
+    async Task HandleSubmit()
+    {
+        if (string.IsNullOrEmpty(cust.Name) || string.IsNullOrEmpty(cust.PhoneNumber) || string.IsNullOrEmpty(cust.ZipCode) || string.IsNullOrEmpty(cust.Address) || !cust.BirthDate.HasValue)
+        {
+            toAstService.ShowError("Please fill customer details correctly!");
+            return;
+        }
+        if (Id == null)
+        {
+            await customerService.SaveCustomer(cust, null);
+        }
+        else
+        {
+            await customerService.SaveCustomer(cust, Id);
+        }
+    }
+
+    async Task DeleteCustomer()
+    {
+        await customerService.DeleteCustomer(cust.CustomerId);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != null)
+        {
+            cust = await customerService.GetCustomerById((int)Id);
+        }
+    }
+
+    void BackToCustomrList()
+    {
+        navigationManager.NavigateTo("customers");
+    }
+}

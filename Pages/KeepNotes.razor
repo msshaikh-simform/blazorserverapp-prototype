@@ -1,0 +1,23 @@
+﻿@page "/keepnotes"
+@attribute [Authorize(Roles = "Administrator,CSM,QuoteStaff")]
+
+@using QuotationMgmtSystem.StateObjects
+@inject KeepNote keepNote
+
+<h3>Keep Notes</h3>
+
+<p>[In-memory using state mgmt] Please note that it'll be only accessible to current tab -- throught application.</p>
+
+<EditForm Model="keepNote">
+    <div class="form-group">
+        <label for="header">Header</label>
+        <InputText id="header" @bind-Value="@keepNote.Heading" class="form-control" placeholder="...yet to do"></InputText>
+    </div>
+    <div class="form-group">
+        <label for="body">Let's Note</label>
+        <InputTextArea rows="10" id="body" @bind-Value="@keepNote.Body" class="form-control" placeholder="...Inquiry on new bid #2, take assist from CSM."></InputTextArea>
+    </div>
+</EditForm>
+
+@code {
+}

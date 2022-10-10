@@ -1,0 +1,69 @@
+﻿@page "/quotes"
+@attribute [Authorize(Roles = "Administrator,QuoteStaff")]
+
+<h3>Quotations</h3>
+@inject IQuotationService quotationService
+@inject NavigationManager navigationManager
+
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Project Name</th>
+            <th>Customer</th>
+            <th>Bid Receipt Date</th>
+            <th>Bid Submission Date</th>
+            <th>Notes</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var quote in quotationService.Quotations)
+        {
+            <tr>
+                <td>@quote.ProjectName</td>
+                <td>@quote.Customer?.Name</td>
+                <td>@quote.BidReceiptDate?.ToShortDateString()</td>
+                <td>@quote.BidSubmissionDate?.ToShortDateString()</td>
+                <td>@quote.Notes</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowQuote(quote.QuoteId))">
+                        <i class="oi oi-pencil"></i>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => DeleteQuote(quote.QuoteId))">
+                        <i class="oi oi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="CreateNewQuote">
+    <i class="oi oi-plus"></i> Create New Quotation
+</button>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await quotationService.LoadQuotes();
+    }
+
+    void ShowQuote(int id)
+    {
+        navigationManager.NavigateTo($"quotepage/{id}");
+    }
+
+    void CreateNewQuote()
+    {
+        navigationManager.NavigateTo("quotepage");
+    }
+
+    async Task DeleteQuote(int quoteId)
+    {
+        await quotationService.DeleteQuotation(quoteId);
+        await quotationService.LoadQuotes();
+    }
+}

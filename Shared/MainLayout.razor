@@ -1,0 +1,45 @@
+﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navigationManager
+@inject IToastService toAstService
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+        <div class="top-row px-4">
+            <a href="https://in.linkedin.com/in/shahidshaikhz" target="_blank">About</a>
+            <AuthorizeView>
+                <Authorized>
+                    <a @onclick="Logout" href="javascript:void(0)">
+                        <i class="oi oi-account-logout"></i>
+                        Logout
+                    </a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/login">
+                        <i class="oi oi-account-login"></i>
+                        Login
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+</div>
+<BlazoredToasts />
+
+@code{
+    private async Task Logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        navigationManager.NavigateTo("/", true);
+        toAstService.ShowSuccess("You're logged out successfully.");
+    }
+}
