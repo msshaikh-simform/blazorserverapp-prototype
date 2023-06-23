@@ -56,7 +56,7 @@ For cloning the project into local machine you need to perform following steps
  - If you are using your local copy of the database then set your connection string in appsettings.json file of your project.
 
 
-### Dependancies
+### Dependencies
 
 #### Nuget Packages
 Below are the dependant packages consumed
